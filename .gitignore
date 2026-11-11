@@ -1,0 +1,10 @@
+# Secrets : la clé Gemini ne doit JAMAIS aller sur GitHub
+.streamlit/secrets.toml
+
+# Fichiers temporaires
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+~$*.xls*
+.venv/
