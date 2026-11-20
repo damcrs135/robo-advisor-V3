@@ -428,7 +428,7 @@ elif S.etape == 2:
             st.markdown(f"#### {bloc}. {noms[L()]}")
             for q in [q for q in qn.QUESTIONS if q["bloc"] == bloc]:
                 n += 1
-                k, cle = q["id"], f"q_{q['id']}"
+                k, cle = q["id"], f"q_{q['id']}_{L()}"     # la langue fait partie de la clé : chaque langue a ses widgets, tous relus depuis le brouillon
                 prec = S.brouillon.get(k, r.get(k))
                 obligatoire = q["type"] in ("choix", "oui_non")
                 st.markdown(f"{n}. {q[L()]}" + (" *" if obligatoire else ""))
@@ -448,6 +448,7 @@ elif S.etape == 2:
                 else:   # oui_non / vrai_faux
                     nouvelles[k] = st.radio(k, [True, False], index={True: 0, False: 1}.get(prec), horizontal=True,
                                             format_func=fmt, **cb)
+    st.caption("v3.3")
     envoye = st.button(t("valider_reponses", L()), type="primary", key="btn_valider_q")
     if envoye:
         manquantes = [q for q in qn.QUESTIONS if q["type"] in ("choix", "oui_non") and nouvelles.get(q["id"]) is None]
