@@ -413,7 +413,14 @@ elif S.etape == 2:
     total_q = len(qn.QUESTIONS)
     st.caption((f"{total_q} questions, environ 10 minutes. Toutes les questions marquées d'un astérisque (*) sont obligatoires."
                 if fr_ else f"{total_q} questions, about 10 minutes. Questions marked with an asterisk (*) are required."))
-    # Pas de st.form : chaque réponse est gardée dans la session, donc changer de langue ne l'efface pas.
+    # Chaque réponse est mémorisée à chaque clic dans S.brouillon ; les widgets sont recréés à partir de ce brouillon.
+    # Changer de langue (ou de page) ne fait donc rien perdre.
+    if "brouillon" not in S:
+        S.brouillon = {}
+
+    def _memoriser(k, cle):
+        S.brouillon[k] = S[cle]
+
     nouvelles = {}
     n = 0
     for bloc, noms in qn.BLOCS.items():
@@ -422,26 +429,25 @@ elif S.etape == 2:
             for q in [q for q in qn.QUESTIONS if q["bloc"] == bloc]:
                 n += 1
                 k, cle = q["id"], f"q_{q['id']}"
-                precedent = r.get(k)
+                prec = S.brouillon.get(k, r.get(k))
                 obligatoire = q["type"] in ("choix", "oui_non")
-                lib = f"{n}. {q[L()]}" + (" *" if obligatoire else "")
+                st.markdown(f"{n}. {q[L()]}" + (" *" if obligatoire else ""))
                 fmt = lambda v, q=q: qn.libelle(q["id"], v, L())
-                if cle not in S:                       # première fois (ou retour sur la page) : on reprend l'ancienne réponse
-                    if q["type"] == "nombre":
-                        S[cle] = int(precedent if precedent is not None else q["defaut"])
-                    elif q["type"] == "multi":
-                        S[cle] = [v for v in (precedent or [])]
-                    elif precedent is not None:
-                        S[cle] = precedent
-                st.markdown(lib)    # libellé affiché à part : l'identité du widget (k) ne dépend pas de la langue
+                cb = dict(key=cle, on_change=_memoriser, args=(k, cle), label_visibility="collapsed")
                 if q["type"] == "nombre":
-                    nouvelles[k] = st.number_input(k, label_visibility="collapsed", min_value=q["min"], max_value=q["max"], step=q.get("pas", 1), key=cle)
+                    nouvelles[k] = st.number_input(k, min_value=q["min"], max_value=q["max"], step=q.get("pas", 1),
+                                                   value=int(prec if prec is not None else q["defaut"]), **cb)
                 elif q["type"] == "choix":
-                    nouvelles[k] = st.radio(k, [o[0] for o in q["options"]], label_visibility="collapsed", index=None, key=cle, format_func=fmt)
+                    valeurs = [o[0] for o in q["options"]]
+                    nouvelles[k] = st.radio(k, valeurs, index=valeurs.index(prec) if prec in valeurs else None,
+                                            format_func=fmt, **cb)
                 elif q["type"] == "multi":
-                    nouvelles[k] = st.multiselect(k, [o[0] for o in q["options"]], label_visibility="collapsed", key=cle, format_func=fmt)
+                    valeurs = [o[0] for o in q["options"]]
+                    nouvelles[k] = st.multiselect(k, valeurs, default=[v for v in (prec or []) if v in valeurs],
+                                                  format_func=fmt, **cb)
                 else:   # oui_non / vrai_faux
-                    nouvelles[k] = st.radio(k, [True, False], label_visibility="collapsed", index=None, key=cle, horizontal=True, format_func=fmt)
+                    nouvelles[k] = st.radio(k, [True, False], index={True: 0, False: 1}.get(prec), horizontal=True,
+                                            format_func=fmt, **cb)
     envoye = st.button(t("valider_reponses", L()), type="primary", key="btn_valider_q")
     if envoye:
         manquantes = [q for q in qn.QUESTIONS if q["type"] in ("choix", "oui_non") and nouvelles.get(q["id"]) is None]
