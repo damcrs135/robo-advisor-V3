@@ -413,38 +413,45 @@ elif S.etape == 2:
     total_q = len(qn.QUESTIONS)
     st.caption((f"{total_q} questions, environ 10 minutes. Toutes les questions marquées d'un astérisque (*) sont obligatoires."
                 if fr_ else f"{total_q} questions, about 10 minutes. Questions marked with an asterisk (*) are required."))
-    with st.form("questionnaire"):
-        nouvelles = {}
-        n = 0
-        for bloc, noms in qn.BLOCS.items():
-            with st.container(border=True):
-                st.markdown(f"#### {bloc}. {noms[L()]}")
-                for q in [q for q in qn.QUESTIONS if q["bloc"] == bloc]:
-                    n += 1
-                    k, defaut = q["id"], r.get(q["id"])
-                    obligatoire = q["type"] in ("choix", "oui_non")
-                    lib = f"{n}. {q[L()]}" + (" *" if obligatoire else "")
+    # Pas de st.form : chaque réponse est gardée dans la session, donc changer de langue ne l'efface pas.
+    nouvelles = {}
+    n = 0
+    for bloc, noms in qn.BLOCS.items():
+        with st.container(border=True):
+            st.markdown(f"#### {bloc}. {noms[L()]}")
+            for q in [q for q in qn.QUESTIONS if q["bloc"] == bloc]:
+                n += 1
+                k, cle = q["id"], f"q_{q['id']}"
+                precedent = r.get(k)
+                obligatoire = q["type"] in ("choix", "oui_non")
+                lib = f"{n}. {q[L()]}" + (" *" if obligatoire else "")
+                fmt = lambda v, q=q: qn.libelle(q["id"], v, L())
+                if cle not in S:                       # première fois (ou retour sur la page) : on reprend l'ancienne réponse
                     if q["type"] == "nombre":
-                        nouvelles[k] = st.number_input(lib, min_value=q["min"], max_value=q["max"],
-                                                       value=int(defaut if defaut is not None else q["defaut"]),
-                                                       step=q.get("pas", 1), key=f"q_{k}")
-                    elif q["type"] == "choix":
-                        valeurs = [o[0] for o in q["options"]]
-                        nouvelles[k] = st.radio(lib, valeurs, index=valeurs.index(defaut) if defaut in valeurs else None,
-                                                key=f"q_{k}", format_func=lambda v, q=q: qn.libelle(q["id"], v, L()))
+                        S[cle] = int(precedent if precedent is not None else q["defaut"])
                     elif q["type"] == "multi":
-                        valeurs = [o[0] for o in q["options"]]
-                        nouvelles[k] = st.multiselect(lib, valeurs, default=[v for v in (defaut or []) if v in valeurs],
-                                                      key=f"q_{k}", format_func=lambda v, q=q: qn.libelle(q["id"], v, L()))
-                    else:   # oui_non / vrai_faux
-                        nouvelles[k] = st.radio(lib, [True, False], index={True: 0, False: 1}.get(defaut), key=f"q_{k}",
-                                                horizontal=True, format_func=lambda v, q=q: qn.libelle(q["id"], v, L()))
-        envoye = st.form_submit_button(t("valider_reponses", L()), type="primary")
+                        S[cle] = [v for v in (precedent or [])]
+                    elif precedent is not None:
+                        S[cle] = precedent
+                if q["type"] == "nombre":
+                    nouvelles[k] = st.number_input(lib, min_value=q["min"], max_value=q["max"], step=q.get("pas", 1), key=cle)
+                elif q["type"] == "choix":
+                    nouvelles[k] = st.radio(lib, [o[0] for o in q["options"]], index=None, key=cle, format_func=fmt)
+                elif q["type"] == "multi":
+                    nouvelles[k] = st.multiselect(lib, [o[0] for o in q["options"]], key=cle, format_func=fmt)
+                else:   # oui_non / vrai_faux
+                    nouvelles[k] = st.radio(lib, [True, False], index=None, key=cle, horizontal=True, format_func=fmt)
+    envoye = st.button(t("valider_reponses", L()), type="primary", key="btn_valider_q")
     if envoye:
         manquantes = [q for q in qn.QUESTIONS if q["type"] in ("choix", "oui_non") and nouvelles.get(q["id"]) is None]
         if manquantes:
             st.error(("Il manque encore des réponses : " if fr_ else "Some answers are missing: ")
                      + " ; ".join(q[L()] for q in manquantes[:6]) + (" …" if len(manquantes) > 6 else ""))
+        elif S.montant > nouvelles["patrimoine"]:
+            st.error((f"Vous investiriez {eur(S.montant)}, soit plus que votre patrimoine total déclaré ({eur(nouvelles['patrimoine'])}). "
+                      "Corrigez le montant à l'étape précédente ou votre patrimoine ci-dessus.") if fr_ else
+                     (f"You would invest {eur(S.montant)}, more than your declared total wealth ({eur(nouvelles['patrimoine'])}). "
+                      "Fix the amount in the previous step or your wealth above."))
         else:
             nouvelles["montant"] = S.montant
             S.reponses = nouvelles

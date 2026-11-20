@@ -10,6 +10,7 @@ import requests
 import streamlit as st
 import yfinance as yf
 
+import questionnaire as qn
 from textes import t
 
 # True = données fictives, aucun appel internet (pour tester sans limite)
@@ -25,7 +26,7 @@ TXT = {
         "actus": "ACTUALITÉS", "portefeuille": "MON PORTEFEUILLE", "marches": "MARCHÉS",
         "actus_nd": "Actualités indisponibles.",
         "creez": "Créez votre portefeuille",
-        "creez_sous": "Une vingtaine de questions, environ 10 minutes.",
+        "creez_sous": f"{len(qn.QUESTIONS)} questions, environ 10 minutes.",
         "commencer": "Commencer le questionnaire",
         "branchement": "Ici, on branchera le démarrage du questionnaire.",
         "etapes": [("Montant", "combien souhaitez-vous investir"),
@@ -96,7 +97,7 @@ TXT = {
         "actus": "NEWS", "portefeuille": "MY PORTFOLIO", "marches": "MARKETS",
         "actus_nd": "News unavailable.",
         "creez": "Build your portfolio",
-        "creez_sous": "About twenty questions, around 10 minutes.",
+        "creez_sous": f"{len(qn.QUESTIONS)} questions, around 10 minutes.",
         "commencer": "Start the questionnaire",
         "branchement": "The questionnaire will be connected here.",
         "etapes": [("Amount", "how much would you like to invest"),

@@ -125,7 +125,9 @@ def calculer_profil(reponses: dict) -> dict:
     part = part_investie(reponses)
     if reponses.get("epargne_precaution") is False:
         alertes.append("Constituez d'abord une épargne de précaution disponible à tout moment.")
-    if part is not None and part > 0.5:
+    if part is not None and part > 1:
+        alertes.append("Le montant investi dépasse votre patrimoine déclaré : vérifiez vos réponses.")
+    elif part is not None and part > 0.5:
         alertes.append("Plus de la moitié de votre patrimoine serait investie ici : risque de concentration.")
     if reponses.get("credits") and reponses.get("besoin_liquidite"):
         alertes.append("Crédits en cours et besoin de liquidité : gardez une réserve disponible.")
