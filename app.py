@@ -448,10 +448,10 @@ elif S.etape == 2:
             st.error(("Il manque encore des réponses : " if fr_ else "Some answers are missing: ")
                      + " ; ".join(q[L()] for q in manquantes[:6]) + (" …" if len(manquantes) > 6 else ""))
         elif S.montant > nouvelles["patrimoine"]:
-            st.error((f"Vous investiriez {eur(S.montant)}, soit plus que votre patrimoine total déclaré ({eur(nouvelles['patrimoine'])}). "
-                      "Corrigez le montant à l'étape précédente ou votre patrimoine ci-dessus.") if fr_ else
-                     (f"You would invest {eur(S.montant)}, more than your declared total wealth ({eur(nouvelles['patrimoine'])}). "
-                      "Fix the amount in the previous step or your wealth above."))
+            st.error((f"Le montant que vous souhaitez investir ({eur(S.montant)}) dépasse votre patrimoine total ({eur(nouvelles['patrimoine'])}). "
+                      "Vérifiez l'un des deux chiffres.") if fr_ else
+                     (f"The amount you want to invest ({eur(S.montant)}) exceeds your total wealth ({eur(nouvelles['patrimoine'])}). "
+                      "Please check one of the two figures."))
         else:
             nouvelles["montant"] = S.montant
             S.reponses = nouvelles
