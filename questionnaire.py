@@ -23,7 +23,7 @@ BLOCS = {
 
 QUESTIONS = [
     # ----------------------------------------------------------------- Bloc A
-    {"id": "age", "bloc": "A", "type": "nombre", "min": 18, "max": 100, "defaut": 45,
+    {"id": "age", "bloc": "A", "type": "nombre", "min": 18, "max": 100, "defaut": 18,
      "fr": "Quel est votre âge ?", "en": "How old are you?"},
     {"id": "situation_familiale", "bloc": "A", "type": "choix",
      "fr": "Votre situation familiale ?", "en": "Your family situation?",
@@ -37,7 +37,7 @@ QUESTIONS = [
                  ("50-100k", "50 000 à 100 000 €", "€50,000 to €100,000", 0),
                  ("100-200k", "100 000 à 200 000 €", "€100,000 to €200,000", 0),
                  (">200k", "Plus de 200 000 €", "Over €200,000", 0)]},
-    {"id": "patrimoine", "bloc": "A", "type": "nombre", "min": 0, "max": 100_000_000, "defaut": 600_000, "pas": 10_000,
+    {"id": "patrimoine", "bloc": "A", "type": "nombre", "min": 0, "max": 100_000_000, "defaut": 0, "pas": 10_000,
      "fr": "Montant total de votre patrimoine (immobilier compris), en euros ?",
      "en": "Total value of your wealth (including real estate), in euros?"},
     {"id": "epargne_precaution", "bloc": "A", "type": "oui_non",

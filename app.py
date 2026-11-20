@@ -32,7 +32,7 @@ from textes import NOMS_ENVELOPPES, t
 st.set_page_config(page_title="Robo-advisor", page_icon="📈", layout="wide",
                    initial_sidebar_state="collapsed")
 
-ETAT_DEFAUT = {"etape": 0, "langue": "fr", "montant": 300_000, "reponses": {}, "profil_calcule": None,
+ETAT_DEFAUT = {"etape": 0, "langue": "fr", "montant": 0, "reponses": {}, "profil_calcule": None,
                "profil_choisi": None, "enveloppe": None, "enveloppe_choisie": None,
                "delta_actions": 0, "delta_oblig": 0, "horizon_ans": None, "explication": None,
                "source_explication": None, "ter_trad": 1.5, "note_construction": None}
@@ -398,7 +398,7 @@ elif S.etape == 1:
     S.montant = st.number_input(t("montant_q", L()), min_value=0, max_value=100_000_000,
                                 step=10_000, key="montant_in")
     statut = scoring.verifier_montant(S.montant)
-    if statut == "trop_bas":
+    if statut == "trop_bas" and S.montant > 0:
         st.error(t("montant_bas", L()))
     elif statut == "trop_haut":
         st.warning(t("montant_haut", L()))
