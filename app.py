@@ -433,14 +433,15 @@ elif S.etape == 2:
                         S[cle] = [v for v in (precedent or [])]
                     elif precedent is not None:
                         S[cle] = precedent
+                st.markdown(lib)    # libellé affiché à part : l'identité du widget (k) ne dépend pas de la langue
                 if q["type"] == "nombre":
-                    nouvelles[k] = st.number_input(lib, min_value=q["min"], max_value=q["max"], step=q.get("pas", 1), key=cle)
+                    nouvelles[k] = st.number_input(k, label_visibility="collapsed", min_value=q["min"], max_value=q["max"], step=q.get("pas", 1), key=cle)
                 elif q["type"] == "choix":
-                    nouvelles[k] = st.radio(lib, [o[0] for o in q["options"]], index=None, key=cle, format_func=fmt)
+                    nouvelles[k] = st.radio(k, [o[0] for o in q["options"]], label_visibility="collapsed", index=None, key=cle, format_func=fmt)
                 elif q["type"] == "multi":
-                    nouvelles[k] = st.multiselect(lib, [o[0] for o in q["options"]], key=cle, format_func=fmt)
+                    nouvelles[k] = st.multiselect(k, [o[0] for o in q["options"]], label_visibility="collapsed", key=cle, format_func=fmt)
                 else:   # oui_non / vrai_faux
-                    nouvelles[k] = st.radio(lib, [True, False], index=None, key=cle, horizontal=True, format_func=fmt)
+                    nouvelles[k] = st.radio(k, [True, False], label_visibility="collapsed", index=None, key=cle, horizontal=True, format_func=fmt)
     envoye = st.button(t("valider_reponses", L()), type="primary", key="btn_valider_q")
     if envoye:
         manquantes = [q for q in qn.QUESTIONS if q["type"] in ("choix", "oui_non") and nouvelles.get(q["id"]) is None]
